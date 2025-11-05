@@ -1,9 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AppBar, Toolbar, Typography, Container, Box, Button, Grid, Paper, Card, CardContent } from '@mui/material';
-import { Gavel, Psychology, Description, People } from '@mui/icons-material';
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Container, 
+  Box, 
+  Button, 
+  Grid, 
+  Paper, 
+  Card, 
+  CardContent,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
+import { 
+  Gavel, 
+  Psychology, 
+  Description, 
+  People, 
+  Menu as MenuIcon,
+  Close as CloseIcon,
+  Home,
+  Business,
+  Contacts as Contact,
+  Login
+} from '@mui/icons-material';
+import EntreprisePage from './EntreprisePage';
+import EntrepriseFormPage from './EntrepriseFormPage';
+import EntrepriseSuccessPage from './EntrepriseSuccessPage';
 import './App.css';
 
 const theme = createTheme({
@@ -158,6 +191,83 @@ function HomePage() {
 }
 
 function App() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const menuItems = [
+    { text: 'Accueil', icon: <Home />, path: '/' },
+    { text: 'Créer une entreprise', icon: <Business />, path: '/entreprise' },
+    { text: 'Services', icon: <Psychology />, path: '/services' },
+    { text: 'Contact', icon: <Contact />, path: '/contact' }
+  ];
+
+  const mobileMenu = (
+    <Box sx={{ width: 280 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        p: 2,
+        backgroundColor: 'primary.main',
+        color: 'white'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Gavel sx={{ mr: 1 }} />
+          <Typography variant="h6">
+            LegalReflex
+          </Typography>
+        </Box>
+        <IconButton 
+          color="inherit" 
+          onClick={handleDrawerToggle}
+          sx={{ color: 'white' }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      
+      <List>
+        {menuItems.map((item) => (
+          <ListItem 
+            button 
+            key={item.text}
+            onClick={() => {
+              if (item.path === '/entreprise') {
+                window.location.href = item.path;
+              }
+              setMobileOpen(false);
+            }}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+        
+        <Box sx={{ p: 2, mt: 2 }}>
+          <Button
+            variant="outlined"
+            fullWidth
+            startIcon={<Login />}
+            sx={{ mb: 1 }}
+          >
+            Connexion
+          </Button>
+          <Button
+            variant="contained"
+            fullWidth
+            color="secondary"
+          >
+            S'inscrire
+          </Button>
+        </Box>
+      </List>
+    </Box>
+  );
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -169,13 +279,70 @@ function App() {
               <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                 LegalReflex
               </Typography>
-              <Button color="inherit">Connexion</Button>
-              <Button color="inherit">S'inscrire</Button>
+              
+              {/* Menu desktop */}
+              {!isMobile && (
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <Button color="inherit" href="/">
+                    Accueil
+                  </Button>
+                  <Button color="inherit" href="/entreprise">
+                    Créer une entreprise
+                  </Button>
+                  <Button color="inherit">
+                    Services
+                  </Button>
+                  <Button color="inherit">
+                    Contact
+                  </Button>
+                  <Button color="inherit">
+                    Connexion
+                  </Button>
+                  <Button color="inherit">
+                    S'inscrire
+                  </Button>
+                </Box>
+              )}
+              
+              {/* Menu hamburger mobile */}
+              {isMobile && (
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="start"
+                  onClick={handleDrawerToggle}
+                >
+                  <MenuIcon />
+                </IconButton>
+              )}
             </Toolbar>
           </AppBar>
           
+          {/* Drawer mobile */}
+          <Drawer
+            variant="temporary"
+            anchor="right"
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile.
+            }}
+            sx={{
+              display: { xs: 'block', md: 'none' },
+              '& .MuiDrawer-paper': { 
+                boxSizing: 'border-box', 
+                width: 280 
+              },
+            }}
+          >
+            {mobileMenu}
+          </Drawer>
+          
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/entreprise" element={<EntreprisePage />} />
+            <Route path="/entreprise/:slug" element={<EntrepriseFormPage />} />
+            <Route path="/entreprise/:slug/success" element={<EntrepriseSuccessPage />} />
           </Routes>
           
           {/* Footer */}
